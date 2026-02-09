@@ -1,0 +1,41 @@
+# Fred Workers — BullMQ Job Processors
+
+# ── Base ──────────────────────────────────────
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+
+# ── Dependencies ──────────────────────────────
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/workers/package.json ./apps/workers/
+COPY packages/db/package.json ./packages/db/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/transformer-registry/package.json ./packages/transformer-registry/
+RUN pnpm install --frozen-lockfile
+
+# ── Development ───────────────────────────────
+FROM base AS development
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/workers/node_modules ./apps/workers/node_modules
+COPY --from=deps /app/packages ./packages
+COPY apps/workers ./apps/workers
+CMD ["pnpm", "--filter", "workers", "dev"]
+
+# ── Build ─────────────────────────────────────
+FROM base AS build
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/workers/node_modules ./apps/workers/node_modules
+COPY --from=deps /app/packages ./packages
+COPY apps/workers ./apps/workers
+RUN pnpm --filter workers build
+
+# ── Production ────────────────────────────────
+FROM base AS production
+ENV NODE_ENV=production
+COPY --from=build /app/apps/workers/dist ./apps/workers/dist
+COPY --from=build /app/apps/workers/node_modules ./apps/workers/node_modules
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/packages ./packages
+CMD ["node", "apps/workers/dist/main.js"]
