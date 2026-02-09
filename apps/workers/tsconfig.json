@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "paths": {
+      "@fred/db": ["../../packages/db/src"],
+      "@fred/db/*": ["../../packages/db/src/*"],
+      "@fred/shared": ["../../packages/shared/src"],
+      "@fred/shared/*": ["../../packages/shared/src/*"],
+      "@fred/transformer-registry": ["../../packages/transformer-registry/src"],
+      "@fred/transformer-registry/*": ["../../packages/transformer-registry/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/__tests__"]
+}

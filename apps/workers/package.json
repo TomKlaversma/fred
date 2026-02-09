@@ -1,0 +1,29 @@
+{
+  "name": "workers",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc",
+    "start:prod": "node dist/main.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "bullmq": "^5.31.0",
+    "ioredis": "^5.4.2",
+    "drizzle-orm": "^0.38.3",
+    "pg": "^8.13.1",
+    "zod": "^3.23.8",
+    "@fred/db": "workspace:*",
+    "@fred/shared": "workspace:*",
+    "@fred/transformer-registry": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8",
+    "@types/pg": "^8.11.10"
+  }
+}
