@@ -1,0 +1,13 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.ts$": ["@swc/jest"]
+  },
+  "testEnvironment": "node",
+  "moduleNameMapper": {
+    "^@fred/db(.*)$": "<rootDir>/../../packages/db/src$1",
+    "^@fred/shared(.*)$": "<rootDir>/../../packages/shared/src$1"
+  }
+}
