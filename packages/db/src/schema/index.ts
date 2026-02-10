@@ -3,6 +3,7 @@ export * from "./users";
 export * from "./integrations";
 export * from "./leads";
 export * from "./lead-companies";
+export * from "./contact-attempts";
 export * from "./campaigns";
 export * from "./campaign-leads";
 export * from "./messages";

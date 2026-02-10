@@ -4,6 +4,7 @@ import { users } from "./users";
 import { integrations } from "./integrations";
 import { leads } from "./leads";
 import { leadCompanies } from "./lead-companies";
+import { contactAttempts } from "./contact-attempts";
 import { campaigns } from "./campaigns";
 import { campaignLeads } from "./campaign-leads";
 import { messages } from "./messages";
@@ -14,16 +15,19 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   integrations: many(integrations),
   leads: many(leads),
   leadCompanies: many(leadCompanies),
+  contactAttempts: many(contactAttempts),
   campaigns: many(campaigns),
   messages: many(messages),
   rawLeads: many(rawLeads),
 }));
 
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   company: one(companies, {
     fields: [users.companyId],
     references: [companies.id],
   }),
+  assignedLeads: many(leads),
+  contactAttempts: many(contactAttempts),
 }));
 
 export const integrationsRelations = relations(integrations, ({ one }) => ({
@@ -42,6 +46,11 @@ export const leadsRelations = relations(leads, ({ one, many }) => ({
     fields: [leads.leadCompanyId],
     references: [leadCompanies.id],
   }),
+  assignedTo: one(users, {
+    fields: [leads.assignedToUserId],
+    references: [users.id],
+  }),
+  contactAttempts: many(contactAttempts),
   campaignLeads: many(campaignLeads),
 }));
 
@@ -88,3 +97,21 @@ export const rawLeadsRelations = relations(rawLeads, ({ one }) => ({
     references: [companies.id],
   }),
 }));
+
+export const contactAttemptsRelations = relations(
+  contactAttempts,
+  ({ one }) => ({
+    company: one(companies, {
+      fields: [contactAttempts.companyId],
+      references: [companies.id],
+    }),
+    lead: one(leads, {
+      fields: [contactAttempts.leadId],
+      references: [leads.id],
+    }),
+    user: one(users, {
+      fields: [contactAttempts.userId],
+      references: [users.id],
+    }),
+  }),
+);
