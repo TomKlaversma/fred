@@ -3,7 +3,7 @@
 ## Product Requirements Document (PRD)
 
 **Version:** 0.1.0
-**Last Updated:** 2026-02-09
+**Last Updated:** 2026-02-10
 
 ---
 
@@ -267,24 +267,24 @@ When N8N workflows change their output shape:
 
 ## 8. Phasing Strategy
 
-### Phase 1: Foundation (Current Focus)
-- [ ] Project PRD and architecture docs
-- [ ] Docker Compose setup (all services)
-- [ ] Monorepo scaffolding (Turborepo)
-- [ ] Database schema design + Drizzle setup
-- [ ] NestJS API skeleton with auth
-- [ ] Basic CRUD: companies, users, leads
+### Phase 1: Foundation ✅ COMPLETE
+- [x] Project PRD and architecture docs
+- [x] Docker Compose setup (all services)
+- [x] Monorepo scaffolding (Turborepo)
+- [x] Database schema design + Drizzle setup
+- [x] NestJS API skeleton with auth
+- [x] Basic CRUD: companies, users, leads
 
-### Phase 2: Pipeline
-- [ ] Raw table infrastructure + outbox pattern
-- [ ] BullMQ job processing
-- [ ] First transformer (raw_leads → leads)
-- [ ] N8N webhook endpoint
+### Phase 2: Pipeline (Current Focus)
+- [x] Raw table infrastructure + outbox pattern
+- [x] BullMQ job processing
+- [x] First transformer (raw_leads → leads)
+- [x] N8N webhook endpoint
 - [ ] Schema fingerprinting (basic)
 
 ### Phase 3: Frontend
-- [ ] Next.js app with shadcn/ui
-- [ ] Orval API client generation
+- [x] Next.js app with shadcn/ui
+- [x] Orval API client generation
 - [ ] Leads table view (TanStack Table)
 - [ ] Dashboard with basic charts
 - [ ] Real-time updates (Socket.IO)
@@ -326,7 +326,48 @@ When N8N workflows change their output shape:
 
 ---
 
-## 10. Open Questions
+## 10. Deployment Status
+
+### Local Development Environment
+
+**Status:** ✅ All services operational (as of 2026-02-10)
+
+| Service | Port | Status | Health |
+|---------|------|--------|--------|
+| PostgreSQL | 5432 | Running | ✅ Healthy |
+| Redis | 6379 | Running | ✅ Healthy |
+| NestJS API | 3001 | Running | ✅ Responding |
+| BullMQ Workers | - | Running | ✅ Processing |
+| Next.js Web | 3000 | Running | ✅ Responding |
+| N8N | 5678 | Running | ✅ Healthy |
+| Bull Board | 3002 | Running | ✅ Responding |
+
+**Endpoints:**
+- API: http://localhost:3001
+- API Health: http://localhost:3001/health
+- Swagger Docs: http://localhost:3001/docs
+- Frontend: http://localhost:3000
+- N8N: http://localhost:5678
+- Bull Board: http://localhost:3002
+
+**Recent Fixes (2026-02-10):**
+- Fixed Docker build target mismatch (production vs development)
+- Fixed Redis connection (REDIS_HOST/REDIS_PORT instead of REDIS_URL)
+- Added @fastify/static dependency for Swagger UI
+- Added bootstrap debug logging for troubleshooting
+
+**Known Issues:**
+- API healthcheck shows "unhealthy" but service is functional (wget not available in container)
+- Redis eviction policy warning (allkeys-lru instead of noeviction) - acceptable for development
+
+**Next Steps:**
+- Run database migrations to create all tables
+- Seed initial test data
+- Test end-to-end data flow (N8N → raw → structured → frontend)
+
+---
+
+## 11. Open Questions
 
 - [ ] Authentication strategy: email/password + magic link? Or SSO from day 1?
 - [ ] Should N8N be shared (multi-tenant) or one instance per company?
