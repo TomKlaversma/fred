@@ -66,6 +66,36 @@ fred/
 Core: `companies`, `users`, `integrations`, `leads`, `lead_companies`, `campaigns`, `campaign_leads`, `messages`
 Pipeline: `raw_leads`, `raw_*`, `outbox_events`, `transformer_configs`, `schema_fingerprints`
 
+## Core Design Principles
+
+### 1. Clarity & Transparency (Critical for Multi-Rep Teams)
+**Problem:** Multiple sales reps working the same leads can accidentally duplicate outreach, send conflicting messages, or waste effort.
+
+**Solution:** Complete visibility into WHO did WHAT and WHEN.
+
+**Requirements:**
+- ✅ **Detailed audit logs** — Every action (contact attempt, status change, assignment) must be logged with user ID and timestamp
+- ✅ **Prevent duplicate outreach** — Show full contact history BEFORE allowing new outreach
+- ✅ **Warn on similar actions** — If a similar email was sent recently, warn the user
+- ✅ **Multi-user design** — All features must consider concurrent usage by multiple team members
+
+**Example:** Before a rep sends an email to a lead, they MUST see:
+- When was this lead last contacted?
+- Via which channel? (email, LinkedIn, call)
+- By which rep?
+- What was the message/subject?
+- Did they respond?
+
+**Anti-pattern:** ❌ Allowing a rep to send an email without seeing that another rep already sent a similar message 2 days ago.
+
+**When adding new features, always ask:**
+1. "Can multiple reps accidentally do the same thing?"
+2. "Will users know what others have already done?"
+3. "Are we logging this action for audit trails?"
+4. "Could this damage the lead relationship if done twice?"
+
+If any answer is unclear, add more safeguards and visibility.
+
 ### Coding Conventions
 - TypeScript strict mode everywhere
 - Drizzle for all database access (no raw SQL in application code)
