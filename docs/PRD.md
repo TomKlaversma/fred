@@ -24,7 +24,7 @@ The key differentiator is the **raw-to-structured pipeline**: N8N workflows writ
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────┐  │
 │  │ Next.js  │  │ NestJS   │  │ BullMQ   │  │     N8N       │  │
 │  │ Frontend │──│ API      │──│ Workers  │  │  Workflows    │  │
-│  │ :3000    │  │ :3001    │  │          │  │  :5678        │  │
+│  │ :3009    │  │ :3001    │  │          │  │  :5678        │  │
 │  └──────────┘  └────┬─────┘  └────┬─────┘  └───────┬───────┘  │
 │                     │             │                  │          │
 │              ┌──────┴─────────────┴──────────────────┴───┐      │
@@ -338,7 +338,7 @@ When N8N workflows change their output shape:
 | Redis | 6380 | Running | ✅ Healthy |
 | NestJS API | 3001 | Running | ✅ Responding |
 | BullMQ Workers | - | Running | ✅ Processing |
-| Next.js Web | 3000 | Running | ✅ Responding |
+| Next.js Web | 3009 | Running | ✅ Responding |
 | N8N | 5678 | Running | ✅ Healthy |
 | Bull Board | 3002 | Running | ✅ Responding |
 
@@ -346,7 +346,7 @@ When N8N workflows change their output shape:
 - API: http://localhost:3001
 - API Health: http://localhost:3001/health
 - Swagger Docs: http://localhost:3001/docs
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3009
 - N8N: http://localhost:5678
 - Bull Board: http://localhost:3002
 

@@ -73,7 +73,7 @@ services:
       NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL}
       NEXT_PUBLIC_WS_URL: ${PUBLIC_WS_URL}
     ports:
-      - "3000:3000"
+      - "3009:3000"
     volumes: []
     deploy:
       resources:
