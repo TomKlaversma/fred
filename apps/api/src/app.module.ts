@@ -8,6 +8,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
 import { UsersModule } from './modules/users/users.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { LeadCompaniesModule } from './modules/lead-companies/lead-companies.module';
+import { ContactAttemptsModule } from './modules/contact-attempts/contact-attempts.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
@@ -48,6 +49,7 @@ import { HealthController } from './health/health.controller';
     UsersModule,
     LeadsModule,
     LeadCompaniesModule,
+    ContactAttemptsModule,
     CampaignsModule,
     MessagesModule,
     IntegrationsModule,
