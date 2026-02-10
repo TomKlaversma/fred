@@ -1,9 +1,9 @@
 {
-  "name": "@fred/transformer-registry",
+  "name": "@app/transformer-registry",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "zod": "^3.24.1",
-    "@fred/shared": "workspace:*"
+    "@app/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3",

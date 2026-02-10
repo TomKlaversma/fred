@@ -1,7 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { DrizzleProvider } from './database.provider';
-
-export const DRIZZLE = Symbol('DRIZZLE');
+import { DRIZZLE } from './database.constants';
 
 @Global()
 @Module({

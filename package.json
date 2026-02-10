@@ -9,9 +9,9 @@
     "test:e2e": "turbo run test:e2e",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "db:generate": "pnpm --filter @fred/db generate",
-    "db:migrate": "pnpm --filter @fred/db migrate",
-    "db:studio": "pnpm --filter @fred/db studio",
+    "db:generate": "pnpm --filter @app/db generate",
+    "db:migrate": "pnpm --filter @app/db migrate",
+    "db:studio": "pnpm --filter @app/db studio",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {

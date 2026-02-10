@@ -110,7 +110,7 @@ describe("Companies table", () => {
   it("has UUID primary key with default", () => {
     expect(columns.id.dataType).toBe("string");
     expect(columns.id.hasDefault).toBe(true);
-    expect(columns.id.isPrimaryKey).toBe(true);
+    expect(columns.id.primary).toBe(true);
   });
 
   it("has not-null constraints on required fields", () => {

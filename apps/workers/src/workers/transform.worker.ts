@@ -1,7 +1,7 @@
 import { Worker, Job } from "bullmq";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
-import { rawLeads, leads } from "@fred/db";
+import { rawLeads, leads } from "@app/db";
 import type { AppDatabase } from "../db";
 
 // ----------------------------------------------------------------
@@ -137,7 +137,7 @@ export async function processTransformJob(
   try {
     // 3. Look up transformer for entityType
     // For now, we only support 'lead' entity type with default field mappings.
-    // TODO: Load field mappings from transformer_configs table or @fred/transformer-registry
+    // TODO: Load field mappings from transformer_configs table or @app/transformer-registry
     if (entityType !== "lead") {
       throw new Error(
         `Unsupported entity type: ${entityType}. Only 'lead' is currently supported.`,

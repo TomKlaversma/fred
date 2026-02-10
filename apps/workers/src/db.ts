@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as schema from "@fred/db";
+import * as schema from "@app/db";
 
 let pool: Pool | null = null;
 

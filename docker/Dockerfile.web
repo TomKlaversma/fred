@@ -8,9 +8,11 @@ WORKDIR /app
 
 # ── Dependencies ──────────────────────────────
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/shared/package.json ./packages/shared/
+COPY packages/db/package.json ./packages/db/
+COPY packages/transformer-registry/package.json ./packages/transformer-registry/
 RUN pnpm install --frozen-lockfile
 
 # ── Development ───────────────────────────────
@@ -24,11 +26,23 @@ CMD ["pnpm", "--filter", "web", "dev"]
 
 # ── Build ─────────────────────────────────────
 FROM base AS build
+# Copy workspace files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
+# Copy all package.json files to establish workspace structure
+COPY apps/web/package.json ./apps/web/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/db/package.json ./packages/db/
+COPY packages/transformer-registry/package.json ./packages/transformer-registry/
+# Copy node_modules
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
-COPY --from=deps /app/packages ./packages
+# Copy source code
+COPY packages ./packages
 COPY apps/web ./apps/web
 ENV NEXT_TELEMETRY_DISABLED=1
+# Build shared package first
+RUN pnpm --filter @app/shared build
+# Then build web
 RUN pnpm --filter web build
 
 # ── Production ────────────────────────────────

@@ -11,7 +11,7 @@ export default defineConfig({
       exclude: ["src/__tests__/**"],
     },
     alias: {
-      "@fred/shared": "../../packages/shared/src",
+      "@app/shared": "../../packages/shared/src",
     },
   },
 });

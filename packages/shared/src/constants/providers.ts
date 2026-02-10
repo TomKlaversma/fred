@@ -1,8 +1,8 @@
-export const Provider = {
+export const Provider = Object.freeze({
   LINKEDIN: 'linkedin',
   EMAIL_SMTP: 'email_smtp',
   GOOGLE: 'google',
   CUSTOM: 'custom',
-} as const;
+} as const);
 
 export type Provider = (typeof Provider)[keyof typeof Provider];

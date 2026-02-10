@@ -54,6 +54,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.api
+      target: development
     container_name: fred-api
     restart: unless-stopped
     environment:

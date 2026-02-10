@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { DRIZZLE } from '../../database/database.module';
+import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
-import { companies } from '@fred/db/schema/companies';
+import { companies } from '@app/db/schema/companies';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 type Company = typeof companies.$inferSelect;

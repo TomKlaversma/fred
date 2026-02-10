@@ -1,9 +1,9 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DRIZZLE } from '../../database/database.module';
+import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
-import { rawLeads } from '@fred/db/schema/raw-leads';
-import { integrations } from '@fred/db/schema/integrations';
+import { rawLeads } from '@app/db/schema/raw-leads';
+import { integrations } from '@app/db/schema/integrations';
 import { eq, and } from 'drizzle-orm';
 import { WebhookPayloadDto } from './dto/webhook-payload.dto';
 import { BatchWebhookPayloadDto } from './dto/batch-webhook-payload.dto';

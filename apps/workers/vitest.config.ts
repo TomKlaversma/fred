@@ -1,19 +1,16 @@
 import { defineConfig } from "vitest/config";
+import path from "path";
 
 export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["src/__tests__/**/*.test.ts"],
-    coverage: {
-      provider: "v8",
-      include: ["src/**/*.ts"],
-      exclude: ["src/__tests__/**", "src/main.ts"],
-    },
+  },
+  resolve: {
     alias: {
-      "@fred/db": "../../packages/db/src",
-      "@fred/shared": "../../packages/shared/src",
-      "@fred/transformer-registry": "../../packages/transformer-registry/src",
+      "@app/db": path.resolve(__dirname, "../../packages/db/src"),
+      "@app/shared": path.resolve(__dirname, "../../packages/shared/src"),
+      "@app/transformer-registry": path.resolve(__dirname, "../../packages/transformer-registry/src"),
     },
   },
 });

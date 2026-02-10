@@ -44,5 +44,5 @@ export const customInstance = async <T>({
     return undefined as T;
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 };

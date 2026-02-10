@@ -2,9 +2,9 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { eq } from 'drizzle-orm';
-import { DRIZZLE } from '../../../database/database.module';
+import { DRIZZLE } from '../../../database/database.constants';
 import type { DrizzleDB } from '../../../database/database.provider';
-import { rawLeads } from '@fred/db/schema/raw-leads';
+import { rawLeads } from '@app/db/schema/raw-leads';
 
 export interface TransformJobData {
   rawLeadId: string;

@@ -1,8 +1,8 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and, sql, ilike, or, desc, asc } from 'drizzle-orm';
-import { DRIZZLE } from '../../database/database.module';
+import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
-import { integrations } from '@fred/db/schema/integrations';
+import { integrations } from '@app/db/schema/integrations';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
 import { PaginationQueryDto, PaginatedResponse } from '../../common/dto/pagination.dto';

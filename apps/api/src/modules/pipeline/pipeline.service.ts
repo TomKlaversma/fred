@@ -2,9 +2,9 @@ import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { eq, sql } from 'drizzle-orm';
-import { DRIZZLE } from '../../database/database.module';
+import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
-import { rawLeads } from '@fred/db/schema/raw-leads';
+import { rawLeads } from '@app/db/schema/raw-leads';
 
 export interface PipelineStatus {
   pending: number;

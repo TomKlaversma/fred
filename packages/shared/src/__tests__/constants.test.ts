@@ -21,12 +21,16 @@ describe('UserRole', () => {
     expect(Object.keys(UserRole)).toHaveLength(3);
   });
 
-  it('should be readonly (as const)', () => {
+  it('should be frozen and immutable at runtime', () => {
+    // Object.freeze() makes the object immutable at runtime
+    expect(Object.isFrozen(UserRole)).toBe(true);
+
+    // Attempting to mutate should throw in strict mode (which Vitest uses)
     expect(() => {
-      // @ts-expect-error — verifying runtime immutability of as-const object
       (UserRole as Record<string, string>).OWNER = 'hacked';
-    }).not.toThrow(); // as const is compile-time only, but the value should still be correct
-    // The TypeScript compiler prevents mutation at compile time via `as const`
+    }).toThrow(/Cannot assign to read only property/);
+
+    // The value should remain unchanged
     expect(UserRole.OWNER).toBe('owner');
   });
 });

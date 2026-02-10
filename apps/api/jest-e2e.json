@@ -7,7 +7,7 @@
   },
   "testEnvironment": "node",
   "moduleNameMapper": {
-    "^@fred/db(.*)$": "<rootDir>/../../packages/db/src$1",
-    "^@fred/shared(.*)$": "<rootDir>/../../packages/shared/src$1"
+    "^@app/db(.*)$": "<rootDir>/../../packages/db/src$1",
+    "^@app/shared(.*)$": "<rootDir>/../../packages/shared/src$1"
   }
 }

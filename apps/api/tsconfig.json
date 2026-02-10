@@ -4,7 +4,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -15,10 +14,10 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@fred/db": ["../../packages/db/src"],
-      "@fred/db/*": ["../../packages/db/src/*"],
-      "@fred/shared": ["../../packages/shared/src"],
-      "@fred/shared/*": ["../../packages/shared/src/*"]
+      "@app/db": ["../../packages/db/dist"],
+      "@app/db/*": ["../../packages/db/dist/*"],
+      "@app/shared": ["../../packages/shared/dist"],
+      "@app/shared/*": ["../../packages/shared/dist/*"]
     }
   },
   "include": ["src/**/*"],

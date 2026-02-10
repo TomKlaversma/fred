@@ -1,9 +1,9 @@
 {
-  "name": "@fred/db",
+  "name": "@app/db",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "generate": "drizzle-kit generate",
@@ -13,7 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "drizzle-orm": "^0.38.3",
+    "drizzle-orm": "^0.36.4",
     "pg": "^8.13.1"
   },
   "devDependencies": {

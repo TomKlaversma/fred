@@ -1,9 +1,9 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { eq, and, sql, ilike, or, desc, asc } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
-import { DRIZZLE } from '../../database/database.module';
+import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
-import { users } from '@fred/db/schema/users';
+import { users } from '@app/db/schema/users';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationQueryDto, PaginatedResponse } from '../../common/dto/pagination.dto';
