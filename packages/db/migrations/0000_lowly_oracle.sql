@@ -194,7 +194,7 @@ ALTER TABLE "campaign_leads" ADD CONSTRAINT "campaign_leads_lead_id_leads_id_fk"
 ALTER TABLE "campaigns" ADD CONSTRAINT "campaigns_company_id_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "contact_attempts" ADD CONSTRAINT "contact_attempts_company_id_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "contact_attempts" ADD CONSTRAINT "contact_attempts_lead_id_leads_id_fk" FOREIGN KEY ("lead_id") REFERENCES "public"."leads"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "contact_attempts" ADD CONSTRAINT "contact_attempts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "contact_attempts" ADD CONSTRAINT "contact_attempts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_company_id_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "integrations" ADD CONSTRAINT "integrations_company_id_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "leads" ADD CONSTRAINT "leads_company_id_companies_id_fk" FOREIGN KEY ("company_id") REFERENCES "public"."companies"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -211,6 +211,7 @@ CREATE INDEX "contact_attempts_method_idx" ON "contact_attempts" USING btree ("c
 CREATE INDEX "contact_attempts_created_idx" ON "contact_attempts" USING btree ("company_id","created_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "users_email_company_id_idx" ON "users" USING btree ("email","company_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "leads_company_id_email_idx" ON "leads" USING btree ("company_id","email") WHERE "leads"."email" IS NOT NULL;--> statement-breakpoint
+CREATE INDEX "leads_status_idx" ON "leads" USING btree ("company_id","status");--> statement-breakpoint
 CREATE INDEX "leads_assigned_to_idx" ON "leads" USING btree ("company_id","assigned_to_user_id");--> statement-breakpoint
 CREATE INDEX "leads_last_contacted_idx" ON "leads" USING btree ("company_id","last_contacted_at");--> statement-breakpoint
 CREATE UNIQUE INDEX "lead_companies_company_id_domain_idx" ON "lead_companies" USING btree ("company_id","domain") WHERE "lead_companies"."domain" IS NOT NULL;

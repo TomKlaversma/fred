@@ -76,6 +76,7 @@ export const leads = pgTable(
     uniqueIndex("leads_company_id_email_idx")
       .on(table.companyId, table.email)
       .where(sql`${table.email} IS NOT NULL`),
+    index("leads_status_idx").on(table.companyId, table.status),
     index("leads_assigned_to_idx").on(table.companyId, table.assignedToUserId),
     index("leads_last_contacted_idx").on(table.companyId, table.lastContactedAt),
   ],

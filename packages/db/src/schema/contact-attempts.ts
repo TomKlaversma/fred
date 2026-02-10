@@ -8,6 +8,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { companies } from "./companies";
 import { leads } from "./leads";
 import { users } from "./users";
@@ -37,7 +38,7 @@ export const contactAttempts = pgTable(
       .references(() => leads.id, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "restrict" }),
 
     // Contact details
     method: contactMethodEnum("method").notNull(),
@@ -50,7 +51,7 @@ export const contactAttempts = pgTable(
     responseAt: timestamp("response_at", { withTimezone: true }),
 
     // Metadata (channel-specific data: message_id, thread_id, etc.)
-    metadata: jsonb("metadata").default({}),
+    metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
