@@ -13,6 +13,7 @@ import { MessagesModule } from './modules/messages/messages.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { PipelineModule } from './modules/pipeline/pipeline.module';
+import { AgentConversationsModule } from './modules/agent-conversations/agent-conversations.module';
 import { EventsModule } from './gateway/events.module';
 import { HealthController } from './health/health.controller';
 
@@ -53,6 +54,7 @@ import { HealthController } from './health/health.controller';
     IntegrationsModule,
     WebhooksModule,
     PipelineModule,
+    AgentConversationsModule,
 
     // WebSocket gateway
     EventsModule,
