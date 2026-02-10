@@ -15,6 +15,16 @@ describe('LeadsService', () => {
   const mockDb = {
     select: jest.fn().mockImplementation((fields?: unknown) => ({
       from: jest.fn().mockReturnValue({
+        leftJoin: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            limit: mockSelectResult,
+            orderBy: jest.fn().mockReturnValue({
+              limit: jest.fn().mockReturnValue({
+                offset: jest.fn().mockResolvedValue([]),
+              }),
+            }),
+          }),
+        }),
         where: jest.fn().mockReturnValue({
           limit: mockSelectResult,
           orderBy: jest.fn().mockReturnValue({
@@ -66,6 +76,7 @@ describe('LeadsService', () => {
   describe('findAll', () => {
     it('should scope queries by companyId', async () => {
       const companyId = 'company-123';
+      const userId = 'user-123';
 
       // Mock count query
       mockDb.select.mockReturnValueOnce({
@@ -74,20 +85,22 @@ describe('LeadsService', () => {
         }),
       });
 
-      // Mock data query
+      // Mock data query with leftJoin
       mockDb.select.mockReturnValueOnce({
         from: jest.fn().mockReturnValue({
-          where: jest.fn().mockReturnValue({
-            orderBy: jest.fn().mockReturnValue({
-              limit: jest.fn().mockReturnValue({
-                offset: jest.fn().mockResolvedValue([]),
+          leftJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              orderBy: jest.fn().mockReturnValue({
+                limit: jest.fn().mockReturnValue({
+                  offset: jest.fn().mockResolvedValue([]),
+                }),
               }),
             }),
           }),
         }),
       });
 
-      const result = await service.findAll(companyId, { page: 1, limit: 20 });
+      const result = await service.findAll(companyId, userId, { page: 1, limit: 20 });
 
       expect(result).toHaveProperty('data');
       expect(result).toHaveProperty('meta');
@@ -137,20 +150,44 @@ describe('LeadsService', () => {
         email: 'lead@example.com',
         firstName: 'Jane',
         status: 'new',
+        contactCount: 0,
+        lastContactedAt: null,
+        lastContactMethod: null,
+        lastResponseAt: null,
       };
 
-      mockSelectResult.mockResolvedValueOnce([mockLead]);
+      // Mock the leftJoin query for findOne
+      mockDb.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          leftJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([{ lead: mockLead, assignedTo: null }]),
+            }),
+          }),
+        }),
+      });
 
       const result = await service.findOne(companyId, leadId);
 
-      expect(result).toEqual(mockLead);
+      expect(result).toHaveProperty('id', leadId);
+      expect(result).toHaveProperty('contactSummary');
+      expect(result.contactSummary.contactCount).toBe(0);
     });
 
     it('should throw NotFoundException when lead not found', async () => {
       const companyId = 'company-123';
       const leadId = 'non-existent-id';
 
-      mockSelectResult.mockResolvedValueOnce([]);
+      // Mock the leftJoin query returning empty result
+      mockDb.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          leftJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
 
       await expect(service.findOne(companyId, leadId)).rejects.toThrow(
         NotFoundException,
@@ -162,7 +199,15 @@ describe('LeadsService', () => {
       const leadId = 'lead-uuid';
 
       // DB query with companyId filter returns nothing (lead belongs to different company)
-      mockSelectResult.mockResolvedValueOnce([]);
+      mockDb.select.mockReturnValueOnce({
+        from: jest.fn().mockReturnValue({
+          leftJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
 
       await expect(service.findOne(companyId, leadId)).rejects.toThrow(
         NotFoundException,
