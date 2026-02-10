@@ -60,7 +60,8 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-fred}:${POSTGRES_PASSWORD:-fred_dev_password}@postgres:5432/${POSTGRES_DB:-fred}
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev_encryption_key_32chars!!}
       PORT: 3001
@@ -95,7 +96,8 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-fred}:${POSTGRES_PASSWORD:-fred_dev_password}@postgres:5432/${POSTGRES_DB:-fred}
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev_encryption_key_32chars!!}
     volumes:
       - ../apps/workers/src:/app/apps/workers/src
