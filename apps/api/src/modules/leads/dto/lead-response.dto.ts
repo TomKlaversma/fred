@@ -15,6 +15,21 @@ export class ContactSummaryDto {
   })
   lastContactMethod?: string;
 
+  @ApiPropertyOptional({
+    description: 'User who made the last contact',
+    type: 'object',
+    properties: {
+      id: { type: 'string', format: 'uuid' },
+      firstName: { type: 'string', nullable: true },
+      lastName: { type: 'string', nullable: true },
+    },
+  })
+  lastContactedBy?: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+  };
+
   @ApiProperty({
     description: 'Total number of contact attempts',
     example: 3,

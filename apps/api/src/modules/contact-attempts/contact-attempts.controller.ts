@@ -5,8 +5,10 @@ import {
   Patch,
   Param,
   Body,
+  Query,
   UseGuards,
   ParseUUIDPipe,
+  ParseIntPipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -76,6 +78,32 @@ export class ContactAttemptsController {
     @Param('leadId', ParseUUIDPipe) leadId: string,
   ) {
     return this.contactAttemptsService.findAllForLead(companyId, leadId);
+  }
+
+  @Get('leads/:leadId/contacts/check-recent')
+  @ApiOperation({
+    summary: 'Check for recent contact attempts before new outreach',
+    description:
+      'Returns contact attempts within a specified time window (default 72 hours) to prevent duplicate outreach. Use this endpoint before creating a new contact attempt to show sales reps when the lead was last contacted and by whom.',
+  })
+  @ApiParam({ name: 'leadId', type: 'string', format: 'uuid' })
+  @ApiResponse({
+    status: 200,
+    description: 'Recent contact attempts retrieved successfully',
+  })
+  async checkRecentContacts(
+    @CompanyId() companyId: string,
+    @Param('leadId', ParseUUIDPipe) leadId: string,
+    @Query('method') method: string,
+    @Query('withinHours', new ParseIntPipe({ optional: true }))
+    withinHours?: number,
+  ) {
+    return this.contactAttemptsService.checkRecentContacts(
+      companyId,
+      leadId,
+      method,
+      withinHours,
+    );
   }
 
   @Patch('contacts/:contactId/responded')

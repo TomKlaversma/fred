@@ -4,6 +4,7 @@ import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
 import { leads } from '@app/db/schema/leads';
 import { users } from '@app/db/schema/users';
+import { contactAttempts } from '@app/db/schema/contact-attempts';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadQueryDto } from './dto/lead-query.dto';
@@ -17,6 +18,11 @@ export interface LeadWithRelations extends Lead {
   contactSummary: {
     lastContactedAt: Date | null;
     lastContactMethod: string | null;
+    lastContactedBy?: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
     contactCount: number;
     lastResponseAt: Date | null;
   };
@@ -79,17 +85,23 @@ export class LeadsService {
       .limit(limit)
       .offset(offset);
 
-    // Transform results to include contact summary
-    const data: LeadWithRelations[] = results.map(({ lead, assignedTo }) => ({
-      ...lead,
-      assignedTo,
-      contactSummary: {
-        lastContactedAt: lead.lastContactedAt,
-        lastContactMethod: lead.lastContactMethod,
-        contactCount: lead.contactCount ?? 0,
-        lastResponseAt: lead.lastResponseAt,
-      },
-    }));
+    // Transform results to include contact summary with lastContactedBy
+    const data: LeadWithRelations[] = await Promise.all(
+      results.map(async ({ lead, assignedTo }) => ({
+        ...lead,
+        assignedTo,
+        contactSummary: {
+          lastContactedAt: lead.lastContactedAt,
+          lastContactMethod: lead.lastContactMethod,
+          lastContactedBy: await this.getLastContactedByUser(
+            companyId,
+            lead.id,
+          ),
+          contactCount: lead.contactCount ?? 0,
+          lastResponseAt: lead.lastResponseAt,
+        },
+      })),
+    );
 
     return {
       data,
@@ -125,10 +137,38 @@ export class LeadsService {
       contactSummary: {
         lastContactedAt: lead.lastContactedAt,
         lastContactMethod: lead.lastContactMethod,
+        lastContactedBy: await this.getLastContactedByUser(companyId, lead.id),
         contactCount: lead.contactCount ?? 0,
         lastResponseAt: lead.lastResponseAt,
       },
     };
+  }
+
+  /**
+   * Get the user who made the most recent contact attempt for a lead
+   */
+  private async getLastContactedByUser(
+    companyId: string,
+    leadId: string,
+  ): Promise<{ id: string; firstName: string | null; lastName: string | null } | null> {
+    const result = await this.db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      })
+      .from(contactAttempts)
+      .leftJoin(users, eq(contactAttempts.userId, users.id))
+      .where(
+        and(
+          eq(contactAttempts.companyId, companyId),
+          eq(contactAttempts.leadId, leadId),
+        ),
+      )
+      .orderBy(desc(contactAttempts.createdAt))
+      .limit(1);
+
+    return result.length > 0 && result[0].id ? result[0] : null;
   }
 
   async create(companyId: string, dto: CreateLeadDto): Promise<Lead> {

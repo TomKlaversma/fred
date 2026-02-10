@@ -63,6 +63,12 @@ export const contactAttempts = pgTable(
     index("contact_attempts_user_idx").on(table.companyId, table.userId),
     index("contact_attempts_method_idx").on(table.companyId, table.method),
     index("contact_attempts_created_idx").on(table.companyId, table.createdAt),
+    // Composite index for getting recent contacts per lead (used by getLastContactedByUser)
+    index("contact_attempts_lead_created_idx").on(table.leadId, table.createdAt),
+    // Partial index for filtering responded contacts
+    index("contact_attempts_responded_idx")
+      .on(table.companyId, table.responded)
+      .where(sql`${table.responded} = true`),
   ],
 );
 
