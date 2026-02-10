@@ -8,6 +8,9 @@ import { campaigns } from "./campaigns";
 import { campaignLeads } from "./campaign-leads";
 import { messages } from "./messages";
 import { rawLeads } from "./raw-leads";
+import { agentConversations } from "./agent-conversations";
+import { agentConversationMessages } from "./agent-conversation-messages";
+import { agentConversationsMeta } from "./agent-conversations-meta";
 
 export const companiesRelations = relations(companies, ({ many }) => ({
   users: many(users),
@@ -17,13 +20,15 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   campaigns: many(campaigns),
   messages: many(messages),
   rawLeads: many(rawLeads),
+  agentConversationsMeta: many(agentConversationsMeta),
 }));
 
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   company: one(companies, {
     fields: [users.companyId],
     references: [companies.id],
   }),
+  agentConversationsMeta: many(agentConversationsMeta),
 }));
 
 export const integrationsRelations = relations(integrations, ({ one }) => ({
@@ -88,3 +93,42 @@ export const rawLeadsRelations = relations(rawLeads, ({ one }) => ({
     references: [companies.id],
   }),
 }));
+
+export const agentConversationsRelations = relations(
+  agentConversations,
+  ({ one, many }) => ({
+    meta: one(agentConversationsMeta, {
+      fields: [agentConversations.id],
+      references: [agentConversationsMeta.conversationId],
+    }),
+    messages: many(agentConversationMessages),
+  }),
+);
+
+export const agentConversationMessagesRelations = relations(
+  agentConversationMessages,
+  ({ one }) => ({
+    conversation: one(agentConversations, {
+      fields: [agentConversationMessages.conversationId],
+      references: [agentConversations.id],
+    }),
+  }),
+);
+
+export const agentConversationsMetaRelations = relations(
+  agentConversationsMeta,
+  ({ one }) => ({
+    conversation: one(agentConversations, {
+      fields: [agentConversationsMeta.conversationId],
+      references: [agentConversations.id],
+    }),
+    company: one(companies, {
+      fields: [agentConversationsMeta.companyId],
+      references: [companies.id],
+    }),
+    user: one(users, {
+      fields: [agentConversationsMeta.userId],
+      references: [users.id],
+    }),
+  }),
+);

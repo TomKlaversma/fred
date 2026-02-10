@@ -7,10 +7,12 @@ import {
   MessageSquare,
   Plug,
   GitBranch,
+  Bot,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Search Agent", href: "/search-agent", icon: Bot },
   { label: "Leads", href: "/leads", icon: Users },
   { label: "Companies", href: "/companies", icon: Building2 },
   { label: "Campaigns", href: "/campaigns", icon: Megaphone },
@@ -63,7 +65,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

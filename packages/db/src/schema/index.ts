@@ -10,4 +10,7 @@ export * from "./raw-leads";
 export * from "./outbox-events";
 export * from "./transformer-configs";
 export * from "./schema-fingerprints";
+export * from "./agent-conversations";
+export * from "./agent-conversation-messages";
+export * from "./agent-conversations-meta";
 export * from "./relations";
