@@ -28,7 +28,7 @@ The key differentiator is the **raw-to-structured pipeline**: N8N workflows writ
 │  └──────────┘  └────┬─────┘  └────┬─────┘  └───────┬───────┘  │
 │                     │             │                  │          │
 │              ┌──────┴─────────────┴──────────────────┴───┐      │
-│              │              PostgreSQL :5432              │      │
+│              │              PostgreSQL :5433              │      │
 │              │  ┌─────────┐  ┌───────────┐  ┌────────┐  │      │
 │              │  │ raw_*   │→ │ outbox    │→ │ struct │  │      │
 │              │  │ tables  │  │ events    │  │ tables │  │      │
@@ -36,7 +36,7 @@ The key differentiator is the **raw-to-structured pipeline**: N8N workflows writ
 │              └───────────────────────────────────────────┘      │
 │                                                                 │
 │              ┌───────────────────────────────────────────┐      │
-│              │              Redis :6379                   │      │
+│              │              Redis :6380                   │      │
 │              │  BullMQ queues + caching + Socket.IO       │      │
 │              └───────────────────────────────────────────┘      │
 └─────────────────────────────────────────────────────────────────┘
@@ -334,8 +334,8 @@ When N8N workflows change their output shape:
 
 | Service | Port | Status | Health |
 |---------|------|--------|--------|
-| PostgreSQL | 5432 | Running | ✅ Healthy |
-| Redis | 6379 | Running | ✅ Healthy |
+| PostgreSQL | 5433 | Running | ✅ Healthy |
+| Redis | 6380 | Running | ✅ Healthy |
 | NestJS API | 3001 | Running | ✅ Responding |
 | BullMQ Workers | - | Running | ✅ Processing |
 | Next.js Web | 3000 | Running | ✅ Responding |
