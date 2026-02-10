@@ -7,6 +7,13 @@ export type {
   UpdateLeadCompanyInput,
 } from './lead-company';
 export type {
+  ContactAttempt,
+  ContactMethod,
+  ContactDirection,
+  CreateContactAttemptInput,
+  UpdateContactAttemptInput,
+} from './contact-attempt';
+export type {
   Campaign,
   CreateCampaignInput,
   UpdateCampaignInput,
