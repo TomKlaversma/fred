@@ -1,0 +1,2 @@
+CREATE INDEX "contact_attempts_lead_created_idx" ON "contact_attempts" USING btree ("lead_id","created_at");--> statement-breakpoint
+CREATE INDEX "contact_attempts_responded_idx" ON "contact_attempts" USING btree ("company_id","responded") WHERE "contact_attempts"."responded" = true;

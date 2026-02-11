@@ -1,13 +1,32 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { eq, and, sql, ilike, or, desc, asc } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.constants';
 import type { DrizzleDB } from '../../database/database.provider';
 import { leads } from '@app/db/schema/leads';
+import { users } from '@app/db/schema/users';
+import { contactAttempts } from '@app/db/schema/contact-attempts';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
-import { PaginationQueryDto, PaginatedResponse } from '../../common/dto/pagination.dto';
+import { LeadQueryDto } from './dto/lead-query.dto';
+import { PaginatedResponse } from '../../common/dto/pagination.dto';
 
 type Lead = typeof leads.$inferSelect;
+type User = typeof users.$inferSelect;
+
+export interface LeadWithRelations extends Lead {
+  assignedTo?: User | null;
+  contactSummary: {
+    lastContactedAt: Date | null;
+    lastContactMethod: string | null;
+    lastContactedBy?: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
+    contactCount: number;
+    lastResponseAt: Date | null;
+  };
+}
 
 @Injectable()
 export class LeadsService {
@@ -15,9 +34,10 @@ export class LeadsService {
 
   async findAll(
     companyId: string,
-    query: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Lead>> {
-    const { page = 1, limit = 20, sort = 'createdAt', order = 'desc', search } = query;
+    userId: string,
+    query: LeadQueryDto,
+  ): Promise<PaginatedResponse<LeadWithRelations>> {
+    const { page = 1, limit = 20, sort = 'createdAt', order = 'desc', search, status, assigned_to_me } = query;
     const offset = (page - 1) * limit;
 
     // Build where conditions
@@ -33,6 +53,14 @@ export class LeadsService {
       );
     }
 
+    if (status) {
+      conditions.push(eq(leads.status, status));
+    }
+
+    if (assigned_to_me === true) {
+      conditions.push(eq(leads.assignedToUserId, userId));
+    }
+
     const whereClause = and(...conditions);
 
     // Get total count
@@ -41,17 +69,39 @@ export class LeadsService {
       .from(leads)
       .where(whereClause);
 
-    // Get paginated results
+    // Get paginated results with assignedTo user relation
     const sortColumn = leads[sort as keyof typeof leads] ?? leads.createdAt;
     const orderFn = order === 'asc' ? asc : desc;
 
-    const data = await this.db
-      .select()
+    const results = await this.db
+      .select({
+        lead: leads,
+        assignedTo: users,
+      })
       .from(leads)
+      .leftJoin(users, eq(leads.assignedToUserId, users.id))
       .where(whereClause)
       .orderBy(orderFn(sortColumn as typeof leads.createdAt))
       .limit(limit)
       .offset(offset);
+
+    // Transform results to include contact summary with lastContactedBy
+    const data: LeadWithRelations[] = await Promise.all(
+      results.map(async ({ lead, assignedTo }) => ({
+        ...lead,
+        assignedTo,
+        contactSummary: {
+          lastContactedAt: lead.lastContactedAt,
+          lastContactMethod: lead.lastContactMethod,
+          lastContactedBy: await this.getLastContactedByUser(
+            companyId,
+            lead.id,
+          ),
+          contactCount: lead.contactCount ?? 0,
+          lastResponseAt: lead.lastResponseAt,
+        },
+      })),
+    );
 
     return {
       data,
@@ -64,21 +114,69 @@ export class LeadsService {
     };
   }
 
-  async findOne(companyId: string, id: string): Promise<Lead> {
-    const [lead] = await this.db
-      .select()
+  async findOne(companyId: string, id: string): Promise<LeadWithRelations> {
+    const results = await this.db
+      .select({
+        lead: leads,
+        assignedTo: users,
+      })
       .from(leads)
+      .leftJoin(users, eq(leads.assignedToUserId, users.id))
       .where(and(eq(leads.id, id), eq(leads.companyId, companyId)))
       .limit(1);
 
-    if (!lead) {
+    if (!results.length) {
       throw new NotFoundException(`Lead with ID ${id} not found`);
     }
 
-    return lead;
+    const { lead, assignedTo } = results[0];
+
+    return {
+      ...lead,
+      assignedTo,
+      contactSummary: {
+        lastContactedAt: lead.lastContactedAt,
+        lastContactMethod: lead.lastContactMethod,
+        lastContactedBy: await this.getLastContactedByUser(companyId, lead.id),
+        contactCount: lead.contactCount ?? 0,
+        lastResponseAt: lead.lastResponseAt,
+      },
+    };
+  }
+
+  /**
+   * Get the user who made the most recent contact attempt for a lead
+   */
+  private async getLastContactedByUser(
+    companyId: string,
+    leadId: string,
+  ): Promise<{ id: string; firstName: string | null; lastName: string | null } | null> {
+    const result = await this.db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+      })
+      .from(contactAttempts)
+      .leftJoin(users, eq(contactAttempts.userId, users.id))
+      .where(
+        and(
+          eq(contactAttempts.companyId, companyId),
+          eq(contactAttempts.leadId, leadId),
+        ),
+      )
+      .orderBy(desc(contactAttempts.createdAt))
+      .limit(1);
+
+    return result.length > 0 && result[0].id ? result[0] : null;
   }
 
   async create(companyId: string, dto: CreateLeadDto): Promise<Lead> {
+    // Validate assignedToUserId belongs to the same company if provided
+    if (dto.assignedToUserId) {
+      await this.validateUserBelongsToCompany(companyId, dto.assignedToUserId);
+    }
+
     const [lead] = await this.db
       .insert(leads)
       .values({
@@ -94,6 +192,8 @@ export class LeadsService {
         tags: dto.tags,
         notes: dto.notes,
         leadCompanyId: dto.leadCompanyId,
+        assignedToUserId: dto.assignedToUserId,
+        assignedAt: dto.assignedToUserId ? new Date() : null,
       })
       .returning();
 
@@ -104,21 +204,36 @@ export class LeadsService {
     // Verify lead belongs to this company
     await this.findOne(companyId, id);
 
+    // Validate assignedToUserId belongs to the same company if provided
+    if (dto.assignedToUserId !== undefined) {
+      if (dto.assignedToUserId !== null) {
+        await this.validateUserBelongsToCompany(companyId, dto.assignedToUserId);
+      }
+    }
+
+    const updateData: Record<string, any> = {};
+
+    if (dto.email !== undefined) updateData.email = dto.email;
+    if (dto.firstName !== undefined) updateData.firstName = dto.firstName;
+    if (dto.lastName !== undefined) updateData.lastName = dto.lastName;
+    if (dto.phone !== undefined) updateData.phone = dto.phone;
+    if (dto.jobTitle !== undefined) updateData.jobTitle = dto.jobTitle;
+    if (dto.linkedinUrl !== undefined) updateData.linkedinUrl = dto.linkedinUrl;
+    if (dto.status !== undefined) updateData.status = dto.status;
+    if (dto.source !== undefined) updateData.source = dto.source;
+    if (dto.tags !== undefined) updateData.tags = dto.tags;
+    if (dto.notes !== undefined) updateData.notes = dto.notes;
+    if (dto.leadCompanyId !== undefined) updateData.leadCompanyId = dto.leadCompanyId;
+
+    // Handle assignment updates
+    if (dto.assignedToUserId !== undefined) {
+      updateData.assignedToUserId = dto.assignedToUserId;
+      updateData.assignedAt = dto.assignedToUserId ? new Date() : null;
+    }
+
     const [updated] = await this.db
       .update(leads)
-      .set({
-        ...(dto.email !== undefined && { email: dto.email }),
-        ...(dto.firstName !== undefined && { firstName: dto.firstName }),
-        ...(dto.lastName !== undefined && { lastName: dto.lastName }),
-        ...(dto.phone !== undefined && { phone: dto.phone }),
-        ...(dto.jobTitle !== undefined && { jobTitle: dto.jobTitle }),
-        ...(dto.linkedinUrl !== undefined && { linkedinUrl: dto.linkedinUrl }),
-        ...(dto.status !== undefined && { status: dto.status }),
-        ...(dto.source !== undefined && { source: dto.source }),
-        ...(dto.tags !== undefined && { tags: dto.tags }),
-        ...(dto.notes !== undefined && { notes: dto.notes }),
-        ...(dto.leadCompanyId !== undefined && { leadCompanyId: dto.leadCompanyId }),
-      })
+      .set(updateData)
       .where(and(eq(leads.id, id), eq(leads.companyId, companyId)))
       .returning();
 
@@ -158,5 +273,36 @@ export class LeadsService {
     }
 
     return { total, byStatus };
+  }
+
+  async assignLead(companyId: string, leadId: string, userId: string): Promise<Lead> {
+    // Verify lead belongs to this company
+    await this.findOne(companyId, leadId);
+
+    // Validate user belongs to the same company
+    await this.validateUserBelongsToCompany(companyId, userId);
+
+    const [updated] = await this.db
+      .update(leads)
+      .set({
+        assignedToUserId: userId,
+        assignedAt: new Date(),
+      })
+      .where(and(eq(leads.id, leadId), eq(leads.companyId, companyId)))
+      .returning();
+
+    return updated;
+  }
+
+  private async validateUserBelongsToCompany(companyId: string, userId: string): Promise<void> {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), eq(users.companyId, companyId)))
+      .limit(1);
+
+    if (!user) {
+      throw new BadRequestException(`User with ID ${userId} does not belong to this company or does not exist`);
+    }
   }
 }

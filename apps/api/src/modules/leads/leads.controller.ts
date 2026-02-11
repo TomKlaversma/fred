@@ -18,13 +18,17 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
-import { PaginationQueryDto } from '../../common/dto/pagination.dto';
+import { AssignLeadDto } from './dto/assign-lead.dto';
+import { LeadQueryDto } from './dto/lead-query.dto';
+import { LeadResponseDto } from './dto/lead-response.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CompanyId } from '../../common/decorators/company-id.decorator';
+import { UserId } from '../../common/decorators/user-id.decorator';
 
 @ApiTags('Leads')
 @ApiBearerAuth()
@@ -34,13 +38,21 @@ export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all leads (paginated)' })
-  @ApiResponse({ status: 200, description: 'Paginated list of leads' })
+  @ApiOperation({ summary: 'List all leads (paginated with filters)' })
+  @ApiResponse({ status: 200, description: 'Paginated list of leads with assigned user and contact summary', type: LeadResponseDto, isArray: true })
+  @ApiQuery({ name: 'status', required: false, enum: ['new', 'enriched', 'contacted', 'conversing', 'qualified', 'converted', 'lost'] })
+  @ApiQuery({ name: 'assigned_to_me', required: false, type: Boolean, description: 'Show only leads assigned to current user' })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'sort', required: false, type: String })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
   async findAll(
     @CompanyId() companyId: string,
-    @Query() query: PaginationQueryDto,
+    @UserId() userId: string,
+    @Query() query: LeadQueryDto,
   ) {
-    return this.leadsService.findAll(companyId, query);
+    return this.leadsService.findAll(companyId, userId, query);
   }
 
   @Get('stats')
@@ -51,9 +63,9 @@ export class LeadsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a lead by ID' })
+  @ApiOperation({ summary: 'Get a lead by ID with assigned user and contact summary' })
   @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'Lead found' })
+  @ApiResponse({ status: 200, description: 'Lead found', type: LeadResponseDto })
   @ApiResponse({ status: 404, description: 'Lead not found' })
   async findOne(
     @CompanyId() companyId: string,
@@ -84,6 +96,20 @@ export class LeadsController {
     @Body() updateLeadDto: UpdateLeadDto,
   ) {
     return this.leadsService.update(companyId, id, updateLeadDto);
+  }
+
+  @Post(':id/assign')
+  @ApiOperation({ summary: 'Assign a lead to a user' })
+  @ApiParam({ name: 'id', type: 'string', format: 'uuid', description: 'Lead ID' })
+  @ApiResponse({ status: 200, description: 'Lead assigned successfully' })
+  @ApiResponse({ status: 400, description: 'User does not belong to this company' })
+  @ApiResponse({ status: 404, description: 'Lead not found' })
+  async assignLead(
+    @CompanyId() companyId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() assignLeadDto: AssignLeadDto,
+  ) {
+    return this.leadsService.assignLead(companyId, id, assignLeadDto.userId);
   }
 
   @Delete(':id')

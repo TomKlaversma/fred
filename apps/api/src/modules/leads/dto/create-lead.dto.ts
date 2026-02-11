@@ -50,12 +50,18 @@ export class CreateLeadDto {
 
   /** Lead status */
   @ApiPropertyOptional({
-    enum: ['new', 'contacted', 'qualified', 'converted', 'lost'],
+    enum: ['new', 'enriched', 'contacted', 'conversing', 'qualified', 'converted', 'lost'],
     default: 'new',
   })
   @IsOptional()
-  @IsIn(['new', 'contacted', 'qualified', 'converted', 'lost'])
-  status?: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+  @IsIn(['new', 'enriched', 'contacted', 'conversing', 'qualified', 'converted', 'lost'])
+  status?: 'new' | 'enriched' | 'contacted' | 'conversing' | 'qualified' | 'converted' | 'lost';
+
+  /** User ID to assign this lead to */
+  @ApiPropertyOptional({ format: 'uuid', description: 'User to assign this lead to' })
+  @IsOptional()
+  @IsUUID()
+  assignedToUserId?: string;
 
   /** Lead source (e.g. "linkedin", "website", "referral") */
   @ApiPropertyOptional({ example: 'linkedin' })
